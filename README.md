@@ -129,6 +129,4 @@ This CLI proves the concept works. The roadmap:
 
 ---
 
-## License
 
-MIT
