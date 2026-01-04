@@ -1,177 +1,134 @@
-# 🚀 Karumi Onboarding Tool
+# Sales AI Assistant Profile Builder
 
-A CLI tool that scrapes any website and automatically generates **persona** and **playbook** YAML files for the [Karumi AI Sales Agent](https://github.com/your-org/karumi).
+**Automatically generate AI sales agent configurations from any website.**
+
+> Turn hours of manual configuration into minutes of automated generation.
+
+---
+
+## Why I Built This
+
+When building AI sales agents, the biggest bottleneck isn't the AI—it's the **onboarding**. Every new customer requires:
+
+- Writing detailed persona files (tone, features, objections)
+- Mapping the entire site navigation
+- Describing every screen
+- Creating demo playbooks with exact button names
+
+This doesn't scale. A single customer onboarding could take hours of manual YAML writing.
+
+**This tool solves that.** Point it at any website, and it generates production-ready configuration files in minutes. The vision is simple: **make AI sales agents accessible to any company, instantly.**
+
+This CLI is a proof of concept. The next step is a full web interface where companies can onboard themselves with zero technical knowledge.
+
+---
 
 ## What It Does
 
-1. **Scrapes** the target website using Playwright (handles SPAs and dynamic content)
-2. **Extracts** all visible text, navigation, buttons, and page structure
-3. **Generates** persona + playbook YAML using GPT-4
-4. **Outputs** ready-to-use configuration files
+```
+Website URL  →  Scrape  →  GPT-4  →  Ready-to-use YAML files
+```
 
-Turn hours of manual YAML writing into minutes of automated generation!
+1. **Scrapes** the website using Playwright (handles SPAs, dynamic content)
+2. **Extracts** all text, buttons, navigation, and page structure
+3. **Generates** two YAML files via GPT-4:
+   - `persona_*.yaml` — AI identity, product knowledge, site map
+   - `*_playbook.yaml` — Demo flow with click targets and narration
 
-## Installation
+---
+
+## Quick Start
+
+### 1. Install
 
 ```bash
-# Clone the repo
-git clone https://github.com/your-org/karumi-onboarding.git
-cd karumi-onboarding
+git clone https://github.com/mbouassa/SalesAIAssistantProfileBuilder.git
+cd SalesAIAssistantProfileBuilder
 
-# Create virtual environment (recommended)
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
 pip install -r requirements.txt
-
-# Install Playwright browsers
 playwright install chromium
 ```
 
-## Usage
-
-### Basic Usage
-
-```bash
-python main.py <url> --company "<CompanyName>"
-```
-
-### Examples
-
-```bash
-# Scrape a dashboard and generate files
-python main.py https://healing-path.vercel.app/dashboard --company "HealingPath"
-
-# Limit the number of pages to scrape
-python main.py https://myapp.com/dashboard --company "MyApp" --max-pages 5
-
-# Specify output directory
-python main.py https://example.com --company "Example" --output-dir ./configs
-```
-
-### Environment Variables
-
-Set your OpenAI API key as an environment variable:
+### 2. Set your OpenAI key
 
 ```bash
 export OPENAI_API_KEY="sk-your-key-here"
 ```
 
-Or create a `.env` file:
-
-```
-OPENAI_API_KEY=sk-your-key-here
-```
-
-Or pass it directly:
+### 3. Run
 
 ```bash
-python main.py https://myapp.com --company "MyApp" --openai-key "sk-..."
+python main.py https://your-app.com/dashboard --company "YourCompany"
 ```
 
-## Output
-
-The tool generates two files in the `output/` folder:
+### 4. Output
 
 ```
 output/
-├── persona_myapp.yaml      # AI persona configuration
-└── myapp_playbook.yaml     # Demo playbook with steps
+├── persona_yourcompany.yaml    # AI personality + product knowledge
+└── yourcompany_playbook.yaml   # Demo script with navigation steps
 ```
 
-### Persona YAML
+---
 
-Contains the AI agent's identity and product knowledge:
-
-- Name, tone, and speaking style
-- Product description and features
-- Site map with navigation structure
-- Screen descriptions for each page
-- Common objections and responses
-
-### Playbook YAML
-
-Contains the demo flow:
-
-- Trigger phrases to start the demo
-- Step-by-step navigation through features
-- Click targets matching actual button text
-- Narration intents for each step
-
-## Integrating with Karumi
-
-After generating the files:
+## Example
 
 ```bash
-# Copy to your Karumi backend
-cp output/persona_myapp.yaml ../Karumi/backend/app/personas/
-cp output/myapp_playbook.yaml ../Karumi/backend/app/playbooks/
-
-# Review and tweak as needed
-# The generated files are a great starting point but may need minor adjustments
+python main.py https://notion.so --company "Notion"
 ```
+
+Generates:
+- A persona that understands Notion's features, tone, and navigation
+- A playbook that demos the product with real button clicks
+
+---
 
 ## Options
 
-| Flag | Short | Description | Default |
-|------|-------|-------------|---------|
-| `--company` | `-c` | Company name (required) | - |
-| `--openai-key` | `-k` | OpenAI API key | `$OPENAI_API_KEY` |
-| `--max-pages` | `-m` | Max pages to scrape | 10 |
-| `--output-dir` | `-o` | Output directory | `output/` |
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--company`, `-c` | Company name (required) | — |
+| `--openai-key`, `-k` | OpenAI API key | `$OPENAI_API_KEY` |
+| `--max-pages`, `-m` | Max pages to scrape | 10 |
+| `--output-dir`, `-o` | Where to save files | `output/` |
+
+---
 
 ## How It Works
 
-### Step 1: Scrape Website
+### Scraping
+- Navigates to the URL, waits for full load
+- Extracts all visible text from the page
+- Finds every button, link, and navigation element
+- Clicks through nav items to discover additional pages
 
-The scraper uses Playwright to:
-- Navigate to the URL and wait for content to load
-- Extract all visible text (`document.body.innerText`)
-- Find buttons, links, and navigation elements
-- Click through main navigation to discover pages
-- Handle tabs and dynamic content
+### Generation
+- Sends all scraped content to GPT-4
+- Infers brand voice, features, and site structure
+- Creates persona with accurate button names and screen descriptions
+- Builds a logical demo flow that uses real UI elements
 
-### Step 2: Generate YAML
-
-All scraped content is sent to GPT-4 with a structured prompt that:
-- Analyzes the brand voice and tone
-- Identifies product features and benefits
-- Maps the navigation structure
-- Creates logical demo flows
-- Uses actual button text for click targets
-
-### Step 3: Output Files
-
-The generated YAML is validated and saved, ready to use with Karumi.
+---
 
 ## Limitations
 
-- **Auth-protected pages**: The scraper can't access pages behind login. Provide a URL to a publicly accessible page or dashboard.
-- **Complex SPAs**: Some single-page apps with heavy client-side routing may not be fully captured.
-- **Accuracy**: Generated YAML is a strong starting point but may need human review for edge cases.
+- **Auth-protected pages** — Can't scrape behind login walls
+- **Complex SPAs** — Some heavy client-side apps may not fully capture
+- **Manual review** — Generated files are 90% there; expect minor tweaks
 
-## Tips for Best Results
+---
 
-1. **Start with the main dashboard** - Point to where users land after login
-2. **Review button names** - Verify the generated click targets match actual UI
-3. **Check screen descriptions** - The AI infers from content; adjust if needed
-4. **Customize the playbook** - Reorder steps or add additional demo flows
+## What's Next
 
-## Development
+This CLI proves the concept works. The roadmap:
 
-```bash
-# Run tests
-pytest tests/
+1. **Web interface** — Upload a URL, get YAML files instantly
+2. **Self-service onboarding** — Companies configure their own AI agents
+3. **Live preview** — See the AI demo before deploying
+4. **One-click deploy** — Push to production directly
 
-# Test scraper only
-python scraper.py https://example.com
-
-# Test with verbose output
-python main.py https://example.com --company "Test" -v
-```
+---
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
-
+MIT
